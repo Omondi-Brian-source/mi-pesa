@@ -1,9 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-<<<<<<< HEAD
 @custom-variant dark (&:is(.dark *));
-=======
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -11,8 +10,8 @@
     "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
     "Helvetica Neue", sans-serif;
   --font-geist-mono: "Menlo", "Monaco", "Courier New", monospace;
+  --radius: 0.625rem;
 }
->>>>>>> 0485787c49305de77ab6e50f8d1f4ef0f5843c77
 
 @theme inline {
   --color-background: var(--background);
@@ -55,7 +54,6 @@
 }
 
 :root {
-  --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -131,8 +129,6 @@
     @apply bg-background text-foreground;
   }
 }
-<<<<<<< HEAD
-=======
 
 html {
   -webkit-font-smoothing: antialiased;
@@ -148,4 +144,3 @@ body {
   -webkit-font-feature-settings: "rlig" 1, "calt" 1;
   font-feature-settings: "rlig" 1, "calt" 1;
 }
->>>>>>> 0485787c49305de77ab6e50f8d1f4ef0f5843c77

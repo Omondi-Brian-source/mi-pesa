@@ -6,11 +6,6 @@ const withAnalyzer = withBundleAnalyzer({
 });
 
 const nextConfig: NextConfig = {
-  // Enable React Compiler for automatic optimization
-  experimental: {
-    reactCompiler: true,
-  },
-
   // Image optimization
   images: {
     formats: ["image/avif", "image/webp"],
@@ -51,9 +46,6 @@ const nextConfig: NextConfig = {
 
   // Production source maps control
   productionBrowserSourceMaps: false,
-
-  // Optimized font loading
-  optimizeFonts: true,
 
   // Trailing slashes
   trailingSlash: false,
