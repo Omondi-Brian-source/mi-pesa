@@ -65,25 +65,13 @@ This Next.js 16 application has been optimized for production performance follow
   - `app/loading.tsx` - Loading skeleton
 - **Benefit**: Improved user experience and reduced bounce rate
 
-### 8. Web Vitals Monitoring
-- **Files**:
-  - `lib/web-vitals.ts` - Tracking implementation
-  - `app/providers.tsx` - Client-side reporter
-- **Metrics Tracked**:
-  - LCP (Largest Contentful Paint) - Target: < 2.5s
-  - FID (First Input Delay) - Target: < 100ms
-  - FCP (First Contentful Paint)
-  - CLS (Cumulative Layout Shift) - Target: < 0.1
-  - TTFB (Time to First Byte)
-- **Configuration**: Analytics endpoint configurable via `NEXT_PUBLIC_VITALS_URL`
-
-### 9. Bundle Analysis
+### 8. Bundle Analysis
 - **File**: `next.config.ts`
 - **Usage**: `npm run build:analyze`
 - **Benefit**: Identify large dependencies and optimize bundle size
 - **Tool**: @next/bundle-analyzer
 
-### 10. Environment Configuration
+### 9. Environment Configuration
 - **Files**: `.env.example`, `.env.local`
 - **Variables**:
   - Site URL configuration
@@ -92,13 +80,6 @@ This Next.js 16 application has been optimized for production performance follow
   - Feature flags
 - **Benefit**: Easy configuration management across environments
 
-## Core Web Vitals Targets
-
-| Metric | Target | Tool |
-|--------|--------|------|
-| LCP | < 2.5s | Web Vitals |
-| INP | < 200ms | Web Vitals |
-| CLS | < 0.1 | Web Vitals |
 
 ## Configuration Files
 
@@ -118,11 +99,9 @@ This Next.js 16 application has been optimized for production performance follow
 ### app/layout.tsx
 - Complete metadata
 - Viewport configuration
-- Web Vitals tracking
 - Structured data
 
 ### package.json
-- Added `web-vitals` for monitoring
 - Added `@next/bundle-analyzer` for analysis
 - Added `build:analyze` script
 
@@ -151,7 +130,6 @@ Copy `.env.example` to `.env.local` and configure:
 ```bash
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:3000/api
-NEXT_PUBLIC_VITALS_URL=          # Optional: Analytics endpoint
 NEXT_PUBLIC_ENABLE_ANALYTICS=false
 ```
 
@@ -165,18 +143,17 @@ NEXT_PUBLIC_ENABLE_ANALYTICS=false
 - ✅ Error boundaries implemented
 - ✅ Loading states defined
 - ✅ SEO/Metadata complete
-- ✅ Web Vitals tracking setup
 - ✅ Bundle analyzer integrated
 - ✅ Environment configuration
 - ✅ TypeScript strict mode
 
 ## Next Steps
 
-1. **Add Analytics Integration**: Configure `NEXT_PUBLIC_VITALS_URL` to send metrics to your analytics platform
-2. **Implement Caching**: Add cache headers to static assets in `next.config.ts`
-3. **Add API Routes**: Create `/api` routes with proper response caching
-4. **Add Component Library**: When ready, implement shadcn/ui components
-5. **Monitor Performance**: Set up monitoring dashboard with Web Vitals data
+1. **Implement Caching**: Add cache headers to static assets in `next.config.ts`
+2. **Add API Routes**: Create `/api` routes with proper response caching
+3. **Add Component Library**: When ready, implement shadcn/ui components
+4. **Setup Analytics**: Integrate with your analytics platform
+5. **Monitor Performance**: Set up monitoring dashboard with performance data
 
 ## References
 
