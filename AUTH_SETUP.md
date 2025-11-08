@@ -1,19 +1,19 @@
 # Authentication Setup Guide
 
-This guide explains how to set up authentication in myPesa with NextAuth.js, Supabase, and magic link support.
+This guide explains how to set up authentication in myPesa with NextAuth.js, Supabase, Resend, and magic link support.
 
 ## Overview
 
 The authentication system includes:
-- **Magic Links** (Email) - Primary authentication method
+- **Magic Links** (Email via Resend) - Primary authentication method
 - **Google OAuth** - Social login option
-- **Apple OAuth** - Social login option
+- **Apple OAuth** - Social login option (optional)
 - **Supabase** - Database adapter for user management
 
 ## Prerequisites
 
 1. A Supabase project (https://supabase.com)
-2. Gmail account for sending magic link emails (or other SMTP provider)
+2. A Resend account for sending magic link emails (https://resend.com)
 3. Google OAuth credentials (for OAuth)
 4. Apple Developer account (optional, for Apple OAuth)
 
@@ -34,35 +34,40 @@ In your Supabase dashboard:
 - Copy `Service Role Key` → `SUPABASE_SERVICE_ROLE_KEY`
 - Copy `Anon Key` → `NEXT_PUBLIC_SUPABASE_ANON_KEY` (optional, for client-side operations)
 
-## Step 2: Set Up Magic Link Email
+## Step 2: Set Up Magic Link Email with Resend
 
-### Option A: Gmail SMTP
+### 2.1 Create a Resend Account
+1. Go to https://resend.com and sign up
+2. Verify your email address
+3. Go to API Keys in your dashboard
+4. Copy your API key
 
-1. Enable 2-factor authentication on your Gmail account
-2. Generate an App Password:
-   - Go to https://myaccount.google.com/apppasswords
-   - Select Mail and Windows Computer
-   - Copy the generated 16-character password
+### 2.2 Configure Your Domain (Optional but Recommended)
+For production, configure a custom domain:
+1. In Resend dashboard, go to Domains
+2. Add your domain (e.g., `mail.mypesa.app`)
+3. Follow DNS verification steps
+4. Use your custom domain as the `from` email address
 
-3. In `.env.local`:
-   ```
-   EMAIL_SERVER_HOST=smtp.gmail.com
-   EMAIL_SERVER_PORT=587
-   EMAIL_SERVER_USER=your-email@gmail.com
-   EMAIL_SERVER_PASSWORD=your-16-char-password
-   EMAIL_FROM=noreply@mypesa.app
-   ```
-
-### Option B: Custom SMTP
-
-Update `.env.local` with your SMTP provider details:
+### 2.3 Update Environment Variables
+In `.env.local`:
 ```
-EMAIL_SERVER_HOST=your-smtp-host.com
-EMAIL_SERVER_PORT=587
-EMAIL_SERVER_USER=your-email@example.com
-EMAIL_SERVER_PASSWORD=your-password
-EMAIL_FROM=noreply@yourdomain.com
+RESEND_API_KEY=your-resend-api-key
+EMAIL_FROM=noreply@mypesa.app  # or your custom domain
 ```
+
+In `.env.example`:
+```
+RESEND_API_KEY=your-resend-api-key
+EMAIL_FROM=noreply@mypesa.app
+```
+
+### 2.4 Test Magic Link
+1. Start the development server: `npm run dev`
+2. Go to http://localhost:3000/login
+3. Enter your email address
+4. Check your inbox for the magic link email
+5. Click the link to sign in
 
 ## Step 3: Google OAuth Setup
 
@@ -80,8 +85,8 @@ EMAIL_FROM=noreply@yourdomain.com
 ### 3.2 Update Environment Variables
 In `.env.local`:
 ```
-GOOGLE_CLIENT_ID=your-client-id
-GOOGLE_CLIENT_SECRET=your-client-secret
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-your-secret
 ```
 
 ## Step 4: Apple OAuth Setup (Optional)
@@ -113,22 +118,27 @@ NEXTAUTH_SECRET=your-generated-secret
 NEXTAUTH_URL=http://localhost:3000  # (change to your domain in production)
 ```
 
-## Step 6: Test Authentication
+## Step 6: Complete Setup
 
 ### 6.1 Start Development Server
 ```bash
 npm run dev
 ```
 
-### 6.2 Test Magic Link
-1. Go to http://localhost:3000/login
-2. Enter your email address
-3. Check your email for a magic link
-4. Click the link to sign in
+### 6.2 Test Authentication
+1. **Test Magic Link**:
+   - Go to http://localhost:3000/login
+   - Enter your email address
+   - Check your inbox for the magic link
+   - Click to sign in
 
-### 6.3 Test Social Login (if configured)
-- Click "Apple" or "Google" buttons
-- You should be redirected to sign in with that provider
+2. **Test Google Login** (if configured):
+   - Click the "Google" button
+   - Sign in with your Google account
+
+3. **Test Apple Login** (if configured):
+   - Click the "Apple" button
+   - Sign in with your Apple ID
 
 ## Database Schema
 
@@ -137,6 +147,21 @@ The Supabase adapter automatically creates these tables:
 - `accounts` - OAuth provider accounts
 - `sessions` - Session tokens
 - `verification_tokens` - Magic link tokens
+
+## Email Templates
+
+The magic link email includes:
+- Professional HTML template with myPesa branding
+- Sign-in button
+- Fallback link (copy & paste)
+- 24-hour expiration notice
+- Security notice about unsolicited emails
+
+Email is sent via Resend with:
+- Automatic bounce and complaint handling
+- Delivery tracking
+- Template support
+- Rich email preview
 
 ## Environment Variables Summary
 
@@ -150,11 +175,8 @@ SUPABASE_SERVICE_ROLE_KEY=eyJxxx...
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=your-secret
 
-# Email (Magic Links)
-EMAIL_SERVER_HOST=smtp.gmail.com
-EMAIL_SERVER_PORT=587
-EMAIL_SERVER_USER=your-email@gmail.com
-EMAIL_SERVER_PASSWORD=your-app-password
+# Email (Magic Links with Resend)
+RESEND_API_KEY=re_xxxxx
 EMAIL_FROM=noreply@mypesa.app
 
 # Google OAuth
@@ -171,31 +193,65 @@ APPLE_SECRET=xxxxxxx
 - [ ] Update `NEXTAUTH_URL` to your production domain
 - [ ] Generate a new `NEXTAUTH_SECRET` with `openssl rand -base64 32`
 - [ ] Use production Supabase credentials
-- [ ] Use production email credentials
+- [ ] Use production Resend API key
+- [ ] Set up custom domain in Resend for email sending
 - [ ] Update OAuth redirect URIs with production domain
 - [ ] Set environment variables in your hosting platform (Vercel, etc.)
 - [ ] Test sign-in, magic links, and social login in production
+- [ ] Enable HTTPS on your production domain
+
+## Resend Best Practices
+
+1. **Custom Domain**: Set up a custom domain for better deliverability
+   - Go to Resend dashboard → Domains
+   - Add your domain
+   - Configure DNS records
+   - Use `noreply@yourdomain.com` as EMAIL_FROM
+
+2. **Monitoring**: Monitor email delivery in Resend dashboard
+   - Check bounce rate
+   - Monitor spam complaints
+   - Track open rates
+
+3. **Testing**: Always test in development first
+   - Use a test email address
+   - Verify HTML rendering
+   - Check button links work
 
 ## Troubleshooting
 
-### Magic Link Not Received
+### Magic Link Email Not Received
 - Check spam/junk folder
-- Verify EMAIL_FROM matches your Gmail address
-- Check Gmail App Passwords setting
+- Verify `RESEND_API_KEY` is correct
+- Check `EMAIL_FROM` is set
+- Test in Resend dashboard with a test email
+
+### Resend API Error
+- Verify API key is valid (starts with `re_`)
+- Check API key has not expired
+- Ensure rate limits not exceeded (100/min)
 
 ### OAuth Returns 401
 - Verify client ID and secret are correct
-- Check redirect URIs match exactly
+- Check redirect URIs match exactly (including protocol)
 - Clear browser cache and cookies
+- Verify OAuth app is not in development mode
 
 ### Database Connection Error
 - Verify Supabase URL and keys
 - Check Supabase project is active
 - Verify Service Role key has correct permissions
 
+## Resend Documentation
+
+- [Resend Docs](https://resend.com/docs)
+- [Resend React Email](https://react.email/)
+- [NextAuth.js Resend Integration](https://next-auth.js.org/providers/email)
+
 ## Additional Resources
 
 - [NextAuth.js Documentation](https://next-auth.js.org/)
 - [NextAuth.js Supabase Adapter](https://next-auth.js.org/adapters/supabase)
 - [Supabase Documentation](https://supabase.com/docs)
-- [Gmail App Passwords](https://support.google.com/accounts/answer/185833)
+- [Google OAuth Documentation](https://developers.google.com/identity)
+- [Apple Sign in Documentation](https://developer.apple.com/sign-in-with-apple/)
