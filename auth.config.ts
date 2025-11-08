@@ -20,8 +20,36 @@ export const authConfig = {
           pass: process.env.RESEND_API_KEY,
         },
       },
-      from: process.env.EMAIL_FROM || "noreply@mypesa.app",
+      from: process.env.EMAIL_FROM || "onboarding@resend.dev",
       maxAge: 24 * 60 * 60, // 24 hours
+      async sendVerificationRequest({ identifier: email, url, expires, provider, theme }) {
+        try {
+          const result = await resend.emails.send({
+            from: process.env.EMAIL_FROM || "onboarding@resend.dev",
+            to: email,
+            subject: "Sign in to myPesa",
+            html: `
+              <h1>Welcome to myPesa</h1>
+              <p>Click the link below to sign in:</p>
+              <a href="${url}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+                Sign in to myPesa
+              </a>
+              <p>Or copy and paste this link:</p>
+              <p><code>${url}</code></p>
+              <p>This link will expire in 24 hours.</p>
+              <p>If you didn't request this link, you can safely ignore this email.</p>
+            `,
+            text: `Sign in to myPesa\n\nClick here to sign in:\n${url}\n\nOr copy and paste this link:\n${url}\n\nThis link will expire in 24 hours.\n\nIf you didn't request this link, you can safely ignore this email.`,
+          });
+
+          if (!result.data?.id) {
+            throw new Error("Failed to send email");
+          }
+        } catch (error) {
+          console.error("Error sending verification email:", error);
+          throw new Error("Could not send verification email");
+        }
+      },
     }),
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID || "",

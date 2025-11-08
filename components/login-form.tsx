@@ -1,4 +1,8 @@
+"use client"
+
+import { useState } from "react"
 import { Smartphone } from "lucide-react"
+import { signIn } from "next-auth/react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -15,9 +19,51 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [email, setEmail] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [message, setMessage] = useState("")
+  const [messageType, setMessageType] = useState<"success" | "error" | "">("")
+
+  const handleMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setMessage("")
+    setMessageType("")
+
+    try {
+      const result = await signIn("email", {
+        email,
+        redirect: false,
+      })
+
+      if (result?.ok) {
+        setMessageType("success")
+        setMessage("Check your email for the magic link!")
+        setEmail("")
+      } else if (result?.error) {
+        setMessageType("error")
+        setMessage(`Error: ${result.error}`)
+      }
+    } catch (error) {
+      setMessageType("error")
+      setMessage("An error occurred. Please try again.")
+      console.error("Magic link error:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    await signIn("google", { redirect: true, callbackUrl: "/" })
+  }
+
+  const handleAppleSignIn = async () => {
+    await signIn("apple", { redirect: true, callbackUrl: "/" })
+  }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <form>
+      <form onSubmit={handleMagicLink}>
         <FieldGroup>
           <div className="flex flex-col items-center gap-2 text-center">
             <a
@@ -31,26 +77,51 @@ export function LoginForm({
             </a>
             <h1 className="text-xl font-bold">Welcome to myPesa</h1>
             <FieldDescription>
-              Don&apos;t have an account? <a href="/signup">Sign up</a>
+              Sign in with your email or social account
             </FieldDescription>
           </div>
           <Field>
             <FieldLabel htmlFor="email">Email</FieldLabel>
             <Input
               id="email"
+              name="email"
               type="email"
               placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={isLoading}
             />
           </Field>
+          {message && (
+            <div
+              className={cn(
+                "text-sm p-3 rounded-md",
+                messageType === "success"
+                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                  : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+              )}
+            >
+              {message}
+            </div>
+          )}
           <Field>
-            <Button type="submit" className="w-full">
-              Sign in with Magic Link
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || !email}
+            >
+              {isLoading ? "Sending..." : "Sign in with Magic Link"}
             </Button>
           </Field>
           <FieldSeparator>Or continue with</FieldSeparator>
           <Field className="grid gap-4 sm:grid-cols-2">
-            <Button variant="outline" type="button">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAppleSignIn}
+              disabled={isLoading}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -63,7 +134,12 @@ export function LoginForm({
               </svg>
               Apple
             </Button>
-            <Button variant="outline" type="button">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGoogleSignIn}
+              disabled={isLoading}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -92,8 +168,15 @@ export function LoginForm({
         </FieldGroup>
       </form>
       <FieldDescription className="px-6 text-center text-xs">
-        By continuing, you agree to our <a href="#" className="underline">Terms of Service</a>{" "}
-        and <a href="#" className="underline">Privacy Policy</a>.
+        By continuing, you agree to our{" "}
+        <a href="#" className="underline">
+          Terms of Service
+        </a>{" "}
+        and{" "}
+        <a href="#" className="underline">
+          Privacy Policy
+        </a>
+        .
       </FieldDescription>
     </div>
   )
