@@ -1,5 +1,9 @@
+import Email from "next-auth/providers/email";
 import Google from "next-auth/providers/google";
 import Apple from "next-auth/providers/apple";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const authConfig = {
   secret: process.env.NEXTAUTH_SECRET,
@@ -7,6 +11,18 @@ export const authConfig = {
     strategy: "jwt" as const,
   },
   providers: [
+    Email({
+      server: {
+        host: "smtp.resend.com",
+        port: 465,
+        auth: {
+          user: "resend",
+          pass: process.env.RESEND_API_KEY,
+        },
+      },
+      from: process.env.EMAIL_FROM || "noreply@mypesa.app",
+      maxAge: 24 * 60 * 60, // 24 hours
+    }),
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
